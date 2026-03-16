@@ -1,0 +1,39 @@
+Bootstrap: docker
+From: ensemblorg/ensembl-vep:release_115.2
+
+%labels
+    org.opencontainers.image.title vep-cattle
+    org.opencontainers.image.description Pinned Ensembl VEP container for Bos taurus VCF annotation
+    org.opencontainers.image.source https://github.com/Ensembl/ensembl-vep
+
+%files
+    scripts/install_bos_taurus_cache.sh /usr/local/bin/install_bos_taurus_cache.sh
+    scripts/run_vep_bos_taurus.sh /usr/local/bin/run_vep_bos_taurus.sh
+
+%environment
+    export VEP_DATA_DIR=/data
+    export VEP_SPECIES=bos_taurus
+    export VEP_ASSEMBLY=ARS-UCD2.0
+    export VEP_CACHE_VERSION=115
+    export VEP_FORKS=4
+
+%post
+    chmod 755 /usr/local/bin/install_bos_taurus_cache.sh
+    chmod 755 /usr/local/bin/run_vep_bos_taurus.sh
+    mkdir -p /data/input /data/output /data/logs
+
+%runscript
+    if [ "$#" -eq 0 ]; then
+        exec /bin/bash
+    fi
+
+    exec "$@"
+
+%help
+    Apptainer image for Bos taurus annotation with Ensembl VEP release_115.2.
+
+    Included helper commands:
+      /usr/local/bin/install_bos_taurus_cache.sh
+      /usr/local/bin/run_vep_bos_taurus.sh
+
+    Recommended host-side usage is documented in README.md.
