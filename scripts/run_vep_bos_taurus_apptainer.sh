@@ -4,12 +4,14 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage: run_vep_bos_taurus_apptainer.sh <input_vcf> <output_vcf> [additional vep arguments]
+       run_vep_bos_taurus_apptainer.sh --list-profiles
 
 Runs Bos taurus VEP annotation inside an Apptainer image.
 
 Examples:
   run_vep_bos_taurus_apptainer.sh input/sample.vcf.gz output/sample.vep.vcf.gz
-  VEP_FORKS=8 run_vep_bos_taurus_apptainer.sh input/sample.vcf.gz output/sample.vep.vcf.gz --everything
+  VEP_FORKS=8 VEP_PROFILE=everything run_vep_bos_taurus_apptainer.sh input/sample.vcf.gz output/sample.vep.vcf.gz
+  VEP_ENABLE_SIFT=1 VEP_ENABLE_POLYPHEN=1 run_vep_bos_taurus_apptainer.sh input/sample.vcf.gz output/sample.vep.vcf.gz
 
 Environment variables:
   APPTAINER_IMAGE       Path to the .sif image (default: <repo>/vep-cattle_115.2.sif)
@@ -19,6 +21,9 @@ Environment variables:
   VEP_ASSEMBLY          Assembly passed into the container (default: ARS-UCD2.0)
   VEP_CACHE_VERSION     Cache version passed into the container (default: 115)
   VEP_FORKS             Number of VEP forks passed into the container (default: 4)
+  VEP_PROFILE           Runner profile: minimal, cattle, or everything (default: cattle)
+  VEP_ENABLE_SIFT       Set to 1 to request SIFT annotations
+  VEP_ENABLE_POLYPHEN   Set to 1 to request PolyPhen annotations
   APPTAINER_EXTRA_OPTS  Extra options inserted before "exec" arguments
 EOF
 }
@@ -28,7 +33,9 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   exit 0
 fi
 
-if [[ $# -lt 2 ]]; then
+if [[ "${1:-}" == "--list-profiles" ]]; then
+  :
+elif [[ $# -lt 2 ]]; then
   usage
   exit 1
 fi
@@ -57,6 +64,9 @@ export APPTAINERENV_VEP_SPECIES="${VEP_SPECIES:-bos_taurus}"
 export APPTAINERENV_VEP_ASSEMBLY="${VEP_ASSEMBLY:-ARS-UCD2.0}"
 export APPTAINERENV_VEP_CACHE_VERSION="${VEP_CACHE_VERSION:-115}"
 export APPTAINERENV_VEP_FORKS="${VEP_FORKS:-4}"
+export APPTAINERENV_VEP_PROFILE="${VEP_PROFILE:-cattle}"
+export APPTAINERENV_VEP_ENABLE_SIFT="${VEP_ENABLE_SIFT:-0}"
+export APPTAINERENV_VEP_ENABLE_POLYPHEN="${VEP_ENABLE_POLYPHEN:-0}"
 
 apptainer_extra_opts=()
 if [[ -n "${APPTAINER_EXTRA_OPTS:-}" ]]; then

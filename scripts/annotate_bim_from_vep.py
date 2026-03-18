@@ -12,6 +12,7 @@ from pathlib import Path
 DNA_COMPLEMENT = str.maketrans({"A": "T", "T": "A", "C": "G", "G": "C"})
 IMPACT_RANK = {"HIGH": 4, "MODERATE": 3, "LOW": 2, "MODIFIER": 1}
 FEATURE_RANK = {"Transcript": 3, "RegulatoryFeature": 2, "MotifFeature": 1}
+PICK_VALUES = {"1", "YES", "Y", "yes", "y"}
 
 
 @dataclass
@@ -292,7 +293,8 @@ def parse_csq_entries(
 
 
 def best_csq_entry(entries: list[dict[str, str]]) -> dict[str, str]:
-    def score(entry: dict[str, str]) -> tuple[int, int, int, int, int, int, int, int]:
+    def score(entry: dict[str, str]) -> tuple[int, int, int, int, int, int, int, int, int, int]:
+        pick = 1 if entry.get("PICK", "") in PICK_VALUES or entry.get("PICK_allele", "") in PICK_VALUES else 0
         canonical = 1 if entry.get("CANONICAL", "") == "YES" else 0
         impact = IMPACT_RANK.get(entry.get("IMPACT", ""), 0)
         feature = FEATURE_RANK.get(entry.get("Feature_type", ""), 0)
@@ -300,8 +302,10 @@ def best_csq_entry(entries: list[dict[str, str]]) -> dict[str, str]:
         non_intergenic = 0 if "intergenic_variant" in entry.get("Consequence", "") else 1
         has_hgvsp = 1 if entry.get("HGVSp", "") else 0
         has_hgvsc = 1 if entry.get("HGVSc", "") else 0
+        has_predictions = 1 if entry.get("SIFT", "") or entry.get("PolyPhen", "") else 0
         has_gene = 1 if entry.get("SYMBOL", "") or entry.get("Gene", "") else 0
         return (
+            pick,
             canonical,
             impact,
             feature,
@@ -309,6 +313,7 @@ def best_csq_entry(entries: list[dict[str, str]]) -> dict[str, str]:
             non_intergenic,
             has_hgvsp,
             has_hgvsc,
+            has_predictions,
             has_gene,
         )
 

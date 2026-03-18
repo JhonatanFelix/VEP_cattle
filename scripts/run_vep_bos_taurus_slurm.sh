@@ -15,7 +15,8 @@ Usage:
 
 Examples:
   sbatch scripts/run_vep_bos_taurus_slurm.sh input/sample.vcf.gz output/sample.vep.vcf.gz
-  sbatch --cpus-per-task=8 --mem=48G scripts/run_vep_bos_taurus_slurm.sh input/sample.vcf.gz output/sample.vep.vcf.gz --everything
+  sbatch --export=ALL,VEP_PROFILE=everything --cpus-per-task=8 --mem=48G scripts/run_vep_bos_taurus_slurm.sh input/sample.vcf.gz output/sample.vep.vcf.gz
+  sbatch --export=ALL,VEP_ENABLE_SIFT=1,VEP_ENABLE_POLYPHEN=1 scripts/run_vep_bos_taurus_slurm.sh input/sample.vcf.gz output/sample.vep.vcf.gz
 
 Behavior:
   - Runs the existing Apptainer wrapper from this repository
@@ -27,6 +28,9 @@ Useful environment variables:
   VEP_HOST_DATA_DIR     Host directory bound to /data
   VEP_HOST_SCRIPTS_DIR  Host scripts directory bound inside the container
   VEP_FORKS             Overrides the default fork count
+  VEP_PROFILE           Runner profile: minimal, cattle, or everything
+  VEP_ENABLE_SIFT       Set to 1 to request SIFT annotations
+  VEP_ENABLE_POLYPHEN   Set to 1 to request PolyPhen annotations
   APPTAINER_EXTRA_OPTS  Extra options inserted into apptainer exec
 EOF
 }
